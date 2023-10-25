@@ -1,64 +1,51 @@
-import os
-
-def load_instance(filename):
-    # Wczytaj instancję z pliku
-    instance = []
+def read_instance_from_file(filename):
     with open(filename, 'r') as file:
-        next(file)  # Pomijamy pierwszą linię z nagłówkiem
-        for line in file:
-            values = line.split()
-            if len(values) == 2:
-                task_value = int(values[0])
-                task_duration = int(values[1])
-                instance.append((task_value, task_duration))
-    return instance
+        n = int(file.readline().strip())
+        instance = [tuple(map(int, file.readline().split())) for _ in range(n)]
+        setup_times = [list(map(int, file.readline().split())) for _ in range(n)]
 
-def load_solution(filename):
-    # Wczytaj rozwiązanie z pliku
-    solution = []
+    return n, instance, setup_times
+
+def read_solution_file(filename):
     with open(filename, 'r') as file:
-        for line in file:
-            values = line.split()
-            if len(values) == 2:
-                task_index = int(values[0])
-                task_start_time = int(values[1])
-                solution.append((task_index, task_start_time))
-    return solution
+        lmax = int(file.readline().strip())
+        schedule = list(map(int, file.readline().split()))
+        return lmax, schedule
 
-def verify_solution(instance, solution):
-    # Weryfikacja poprawności rozwiązania
-    total_value = 0
-    max_end_time = 0
-    for task_index, task_start_time in solution:
-        if task_index < 0 or task_index >= len(instance):
-            return f"Niepoprawny numer zadania: {task_index}"
+def compute_lmax(instance, setup_times, schedule):
+    lmax = 0
+    time = 0
 
-        task_value, task_duration = instance[task_index]
-        task_end_time = task_start_time + task_duration
+    for i in range(len(schedule)):
+        if i == 0:
+            setup_time = 0
+        else:
+            setup_time = setup_times[schedule[i-1]-1][schedule[i]-1]
+        time += setup_time + instance[schedule[i]-1][0]
+        delay = time - instance[schedule[i]-1][1]
+        lmax = max(lmax, delay)
 
-        if task_start_time < 0 or task_end_time > max_end_time:
-            return f"Zadanie {task_index} jest niepoprawnie zaplanowane"
-
-        total_value += task_value
-        max_end_time = max(max_end_time, task_end_time)
-
-    return f"Wartość rozwiązania: {total_value}"
+    return lmax
 
 def main():
-    instance_folder = "instances"
-    solution_folder = "solutions"
-    
     sizes = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
 
     for n in sizes:
-        instance_filename = os.path.join(instance_folder, f'instance_n{n}.txt')
-        solution_filename = os.path.join(solution_folder, f'solution_n{n}.txt')
+        # Wczytaj instancję
+        instance_file = f'instances/in_147567_{n}.txt'
+        n, instance, setup_times = read_instance_from_file(instance_file)
 
-        instance = load_instance(instance_filename)
-        solution = load_solution(solution_filename)
+        # Wczytaj rozwiązanie
+        solution_file = f'solutions/out_50'
+        expected_lmax, schedule = read_solution_file(solution_file)
 
-        verification_result = verify_solution(instance, solution)
-        print(f"Verification for n={n}: {verification_result}")
+        lmax_computed = compute_lmax(instance, setup_times, schedule)
+
+        # Porównaj wynik obliczony z oczekiwanym wynikiem
+        if lmax_computed == expected_lmax:
+            print(f'Instance with n={n} is correctly solved. lmax={lmax_computed}')
+        else:
+            print(f'Instance with n={n} is not correctly solved. Expected lmax={expected_lmax}, computed lmax={lmax_computed}')
 
 if __name__ == "__main__":
     main()
