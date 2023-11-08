@@ -1,3 +1,6 @@
+import sys
+import time
+import argparse
 # Funkcja do wczytywania danych z pliku wejściowego
 def read_input(file_name):
     with open(file_name, 'r') as file:
@@ -67,18 +70,14 @@ for index in indices:
     for n in sizes:
         solve(index, n)
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Program to verify solution for a scheduling problem.")
+    parser.add_argument("input_file", help="Input file containing task data and setup times.")
+    parser.add_argument("output_file", help="Output file containing the solution to verify.")
+    parser.add_argument("time_limit", type=int, help="Time limit for verification in seconds.")
 
+    args = parser.parse_args()
 
-# def solve(input_file):
-#     num_tasks, tasks_data, setup_times = read_input(input_file)
-#     ordered_jobs = heuristic_schedule_weighted(tasks_data)
-#     Lmax = calculate_Lmax(ordered_jobs, tasks_data, setup_times)
-
-#     result_file = 'output.txt'
-#     with open(result_file, 'w') as file:
-#         file.write(str(Lmax) + '\n')
-#         file.write(' '.join(str(job + 1) for job in ordered_jobs))
-
-
-# # Uruchomienie programu dla przykładowego pliku wejściowego
-# solve('instances/in_147567_500.txt')
+    input_file = args.input_file
+    output_file = args.output_file
+    time_limit = args.time_limit
