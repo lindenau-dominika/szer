@@ -1,9 +1,8 @@
-import time  # Dodaj import modułu time
+import subprocess
+import time
+import sys
 
-indices = [148163, 148066, 145442, 144441, 148144, 148160, 147567, 148178, 148239, 148410, 147414]
-sizes = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
 
-# Funkcja do wczytywania danych z pliku wejściowego
 def read_input(file_name):
     with open(file_name, 'r') as file:
         lines = file.readlines()
@@ -12,7 +11,7 @@ def read_input(file_name):
         S = [list(map(int, line.split())) for line in lines[n+1:]]
     return n, data, S
 
-# Funkcja do obliczania Lmax na podstawie ustalonej kolejności zadań
+
 def calculate_Lmax(order, data, S):
     n = len(order)
     C = [0] * n
@@ -26,38 +25,70 @@ def calculate_Lmax(order, data, S):
         L[i] = max(0, C[i] - data[j][1])
     return max(L)
 
-# Funkcja weryfikująca poprawność pliku wynikowego
-def verify_solution(index, size):
-    start_time = time.time()  # Zarejestruj czas rozpoczęcia weryfikacji
-    input_instance_path = f'instancje/in_{index}_{size}.txt'
-    output_result_path = f'wyniki/out_{index}_{size}.txt'
 
-    n, data, S = read_input(input_instance_path)
+def verify_solution(input_file, output_file):
+    n, data, S = read_input(input_file)
 
-
-    # Wczytanie wyniku
-    with open(output_result_path, 'r') as file:
+    with open(output_file, 'r') as file:
         lines = file.read().splitlines()
         reported_Lmax = int(lines[0])
-        order = [int(j) - 1 for j in lines[1].split()]  # Asumujemy, że zadania są numerowane od 1
+        order = [int(j) - 1 for j in lines[1].split()]  # Assuming tasks are numbered from 1
 
     if len(set(order)) != n:
-        return False, "Każde zadanie musi wystąpić dokładnie jeden raz."
+        return False, "Each task must occur exactly once."
 
-    # Obliczenie Lmax na podstawie kolejności z pliku wynikowego
     calculated_Lmax = calculate_Lmax(order, data, S)
 
-    end_time = time.time()  # Zarejestruj czas zakończenia weryfikacji
-    elapsed_time = end_time - start_time  # Oblicz czas trwania weryfikacji
-
-    # Porównanie obliczonego Lmax z podanym w pliku wynikowym
     if calculated_Lmax != reported_Lmax:
-        return False, f"Niepoprawny Lmax. Oczekiwano: {reported_Lmax}, otrzymano: {calculated_Lmax}. Czas weryfikacji: {elapsed_time} sekund."
+        return False, f"Incorrect Lmax. Expected: {reported_Lmax}, obtained: {calculated_Lmax}."
 
-    return True, f"Poprawny Lmax. Wartość: {calculated_Lmax}. Czas weryfikacji: {elapsed_time} sekund."
+    return True, f"Correct Lmax. Value: {calculated_Lmax}."
 
-# Uruchomienie funkcji weryfikującej dla wszystkich kombinacji indices i sizes
-for index in indices:
-    for size in sizes:
-        is_correct, message = verify_solution(index, size)
-        print(f"{message} Dla pliku in_{index}_{size}.txt")
+
+def convert_time_limit(time_limit_str):
+    try:
+        return float(time_limit_str)
+    except ValueError:
+        print("The time limit must be a number.")
+        sys.exit(1)
+
+
+if len(sys.argv) != 5:
+    print("Usage: python run_executable.py executable_path input_filename output_filename time_limit")
+    sys.exit(1)
+
+_, executable_path, input_filename, output_filename, time_limit_str = sys.argv
+
+try:
+    time_limit = float(time_limit_str)
+except ValueError:
+    print("The time limit must be a number.")
+    sys.exit(1)
+
+start_time = time.time()
+
+try:
+    process = subprocess.run([executable_path, input_filename, output_filename, time_limit_str],
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             timeout=time_limit,
+                             text=True)
+except subprocess.TimeoutExpired:
+    print(f"Process exceeded the time limit of {time_limit_str} seconds and was terminated.")
+    sys.exit(1)
+
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+
+# Verify the correctness of the solution
+is_correct, message = verify_solution(input_filename, output_filename)
+print(f"{message} Time: {elapsed_time:.4f} seconds")
+
+if process.returncode == 0 and is_correct:
+    print("Execution and verification successful.")
+    print(process.stdout)
+else:
+    print("Execution failed or solution is incorrect.")
+    if process.stderr:
+        print(process.stderr)

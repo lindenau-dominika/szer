@@ -72,8 +72,3 @@ if __name__ == "__main__":
     solve(input_file, output_file)
     end_time = time.time()
     elapsed_time = end_time - start_time
-
-    if elapsed_time > time_limit:
-        print(f"Exceeded time limit. Elapsed time: {elapsed_time} seconds.")
-    else:
-        print(f"Solution computed successfully. Elapsed time: {elapsed_time} seconds.")
