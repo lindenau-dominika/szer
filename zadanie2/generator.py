@@ -2,7 +2,10 @@ import random
 
 def generate_instance(n):
     # Generate random coefficients for machine speeds
-    machine_speeds = [round(random.uniform(0.5, 1.5), 2) for _ in range(5)]
+    machine_speeds = [round(random.uniform(1, 2), 2) for _ in range(5)]
+
+    # Set at least one machine speed to 1
+    machine_speeds[random.randint(0, 4)] = 1.0
 
     # Generate random task parameters for n tasks
     tasks = []
@@ -14,6 +17,9 @@ def generate_instance(n):
 
     # Write the instance to a text file
     with open(f'in_147567_{n}.txt', 'w') as file:
+        # Write the number of instances as the first line
+        file.write(str(n) + "\n")
+
         # Write machine speeds
         file.write(" ".join(map(str, machine_speeds)) + "\n")
         

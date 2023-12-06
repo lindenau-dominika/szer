@@ -22,7 +22,7 @@ def calculate_Lmax(order, data, S):
             C[i] = C[i - 1] + data[j][0] + S[order[i - 1]][j]
         else:
             C[i] = data[j][0]
-        L[i] = max(0, C[i] - data[j][1])
+        L[i] = max(float('-inf'), C[i] - data[j][1])
     return max(L)
 
 
