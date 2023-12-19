@@ -52,8 +52,8 @@ def write_output(file_path, criterion, sequence):
         file.write(f"{int(criterion)}\n")
         file.write(" ".join([f"{i+1}" for i in sequence]) + "\n")
 
-file_path_input = 'input_100.txt'
-file_path_output = 'output_100.txt'
+file_path_input = 'in_148178_50.txt'
+file_path_output = 'output_50.txt'
 
 input_data = read_input(file_path_input)
 

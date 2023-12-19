@@ -15,30 +15,32 @@ def validate_solution(instance_file, solution_file):
 
     completion_times = [0] * 4
     total_ewdw = 0
+    ew, dw = 0, 0
 
     for job_index in job_sequence:
-        job_data = jobs[job_index - 1]  # Indeksacja w pliku zaczyna się od 1
+        job_data = jobs[job_index - 1]
 
-        for machine, time in enumerate(job_data[:4]):  # Zmiana zakresu na pierwsze cztery kolumny
-            completion_times[machine] += time
-            dw = max(0, completion_times[machine] - job_data[-3])
-            ew = max(0, job_data[-3] - completion_times[machine])  # Poprawa indeksacji
-        total_ewdw += job_data[-2] * ew + job_data[-1] * dw
+        completion_times[0]+= job_data[0]
+        for machine in range(1, 4):
+            completion_times[machine] = max(completion_times[machine], completion_times[machine-1]) + job_data[machine]
+            timer = job_data[4] - completion_times[3] 
+        if (timer > 0):
+            ew += (timer * job_data[5])
+        else:
+            dw += (-timer) * job_data[6]
+    total_ewdw += ew + dw
 
-    # Pokazanie oczekiwanej wartości wynikowej
     print("Oczekiwana suma ważonego wyprzedzenia i opóźnienia:", expected_ewdw)
 
-    # Sprawdzenie, czy obliczona suma ważonego wyprzedzenia i opóźnienia zgadza się z wartością z pliku wyjściowego
     if total_ewdw != expected_ewdw:
         print("Błędna suma ważonego wyprzedzenia i opóźnienia! total:", total_ewdw, 'expected:', expected_ewdw)
         return False
 
-    # Jeżeli dotarliśmy do tego punktu, rozwiązanie jest poprawne
     return True
 
 # Przykład użycia
-instance_file = "input_100.txt"
-solution_file = "output_100.txt"
+instance_file = "in_5.txt"
+solution_file = "out_5.txt"
 result = validate_solution(instance_file, solution_file)
 if result:
     print("Rozwiązanie jest poprawne.")
