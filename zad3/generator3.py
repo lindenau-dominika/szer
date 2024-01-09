@@ -11,7 +11,7 @@ def generate_instance(n):
 
         input_data += " ".join(map(str, pi + [di, ai, bi])) + '\n'
 
-        with open(f"input_{n}.txt", "w") as input_file:
+        with open(f"in_147567_{n}.txt", "w") as input_file:
             input_file.write(input_data)
     
 
